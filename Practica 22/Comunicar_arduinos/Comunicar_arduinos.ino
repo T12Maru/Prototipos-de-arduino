@@ -1,6 +1,6 @@
 #include <SoftwareSerial.h>
 
-#define MAX_MSG 65535
+#define MAX_SIZE 32
 
 // Variables globales para comunicación del arduino
 const int rxpin = 2;
@@ -9,10 +9,11 @@ const int txpin = 3;
 // Variables que tienen que ver con el protocolo de comunicación
 const byte H = 'H';
 const byte F = 'F';
+byte b;
 
 bool recibiendo_mensaje = false;
 bool conozco_tamanio = false;
-byte [MAX_MSG] buffer; 
+byte buffer[MAX_SIZE]; 
 
 int estado = 0;
 unsigned int size = 0;
@@ -56,8 +57,8 @@ void enviarPC(int size){
 void loop() {
   if(Serial.available() > 0){ // Si la computadora a la cuál estoy conectado me envió algo:
     switch(estado){
-      case 0; // Esperando H
-        byte b = Serial.read();
+      case 0: // Esperando H
+        b = Serial.read();
         if(b == H){
           estado = 1;
           size = 0;
@@ -65,18 +66,18 @@ void loop() {
         }
         break;
 
-      case 1; // Esperando el tamanio (corresponde a 2 bytes)
+      case 1: // Esperando el tamanio (corresponde a 2 bytes)
         if(Serial.available() >= 2){// nos aseguramos de leer solo cuando estén los 2 bits del tamaño...
-          byte b = Serial.read();
+          b = Serial.read();
           size = (b << 8);
           b = Serial.read();
           size |= b;
           estado = 2 ;
         }
         break;
-      case 2; // esperamos el mensaje a transmitir
+      case 2: // esperamos el mensaje a transmitir
         while(Serial.available() > 0 && (leidos < size)){
-          byte b = Serial.read();
+          b = Serial.read();
           buffer[leidos++] = b;
         }
 
@@ -86,8 +87,8 @@ void loop() {
 
         break;
 
-      case 3; // esperamos la F 
-        byte b = Serial.read();
+      case 3: // esperamos la F 
+        b = Serial.read();
         if(b == F){
           enviarArduino(size);
           estado = 0;
@@ -101,8 +102,8 @@ void loop() {
   if(serialArduino.available() > 0){
     
     switch(estado){
-      case 0; // Esperando H
-        byte b = serialArduino.read();
+      case 0: // Esperando H
+        b = serialArduino.read();
         if(b == H){
           estado = 1;
           size = 0;
@@ -110,18 +111,18 @@ void loop() {
         }
         break;
 
-      case 1; // Esperando el tamanio (corresponde a 2 bytes)
+      case 1: // Esperando el tamanio (corresponde a 2 bytes)
         if(serialArduino.available() >= 2){// nos aseguramos de leer solo cuando estén los 2 bits del tamaño...
-          byte b = serialArduino.read();
+          b = serialArduino.read();
           size = (b << 8);
           b = serialArduino.read();
           size |= b;
           estado = 2 ;
         }
         break;
-      case 2; // esperamos el mensaje a transmitir
+      case 2: // esperamos el mensaje a transmitir
         while(serialArduino.available() > 0 && (leidos < size)){
-          byte b = serialArduino.read();
+          b = serialArduino.read();
           buffer[leidos++] = b;
         }
 
@@ -131,8 +132,8 @@ void loop() {
 
         break;
 
-      case 3; // esperamos la F 
-        byte b = serialArduino.read();
+      case 3: // esperamos la F 
+        b = serialArduino.read();
         if(b == F){
           enviarPC(size);
           estado = 0;
