@@ -43,12 +43,12 @@ void enviarArduino(unsigned int size){
 
 void enviarPC(int size){
   // bits mas significativos a menos significativos
-  serialArduino.write((size >> 8) & 0xFF);
+  Serial.write((size >> 8) & 0xFF);
   //bits menos significativos
-  serialArduino.write(size & 0xFF);
+  Serial.write(size & 0xFF);
   
   for(unsigned int i = 0 ; i < size ; i++){
-    serialArduino.write(buffer[i]);
+    Serial.write(buffer[i]);
   }
 }
 
