@@ -81,7 +81,7 @@ void loop() {
           size = (b << 8);
           b = Serial.read();
           size |= b;
-          estado_miPC = 2 ;
+          estado_miPC = 3;
         }
         break;
       case 3: // esperamos el mensaje a transmitir
@@ -91,7 +91,7 @@ void loop() {
         }
 
         if(leidos == size){
-          estado_miPC = 3;
+          estado_miPC = 4;
         }
 
         break;

@@ -43,7 +43,7 @@ void enviar_archivo(byte [] file){
   println("enviando: " + str(file.length));
   
   myPort.write('H');
-  myPort.write("1"); //Es el identificador de la maquina, consta de 1 byte. La otra maquina puede ser 2, 3, ...
+  myPort.write(1); //Es el identificador de la maquina, consta de 1 byte. La otra maquina puede ser 2, 3, ...
   myPort.write((file.length >> 8) & 0xFF);
   myPort.write(file.length & 0xFF);
   
@@ -54,7 +54,7 @@ void enviar_archivo(byte [] file){
 }
 
 void serialEvent(Serial p){
-  if(p.available() > 0){
+  while(p.available() > 0){
     switch(estado){
       case 0: // esperando por una señal (255 o 11111111) de que se esta usando el canal, si se confirma esto, no se deberá poder transmitir desde este dispositivo
         data = p.read();
@@ -66,7 +66,12 @@ void serialEvent(Serial p){
       case 1: // se espera el id
         data = p.read();
         id = data;
-        estado = 2;
+        if(id == 1){
+          estado = 4;
+        }else{
+          estado = 2;
+        }
+        
         println("La computadora que esta transmitiendo corresponde al id: " + id);
         break;
       case 2: // se espera el tamaño del mensaje
@@ -93,6 +98,14 @@ void serialEvent(Serial p){
           estado = 0;
           println("Archivo guardado, regresando al estado 0");
         }
+        break;
+      case 4:
+        while(p.available() > 0){
+          String s = p.readString();
+          print(s);
+          if(s == "\n") estado = 0;
+        }
+        
         break;
     }
   }
