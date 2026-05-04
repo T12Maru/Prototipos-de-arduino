@@ -4,6 +4,12 @@ Serial myPort;
 
 byte[] file;
 
+byte[] buffer;
+int size = 0; 
+int leidos = 0;
+int estado = 0;
+int data = 0;
+
 public static final short portIndex = 2;
 
 void setup(){
@@ -42,8 +48,33 @@ void enviar_archivo(byte [] file){
 }
 
 void serialEvent(Serial p){
-  while(p.available() > 0){
-    int data = p.read();
-    print("Recibi: " + binary(data,8));
+  if(p.available() > 0){
+    switch(estado){
+      case 0:
+        if(p.available() >= 2){
+          data = p.read();
+          size = ((byte)data << 8);
+          data = p.read();
+          size |= (byte)data;
+          
+          leidos = 0;
+          buffer = new byte[size];
+          estado = 1;
+        }
+        break;
+      case 1:
+        while(p.available() > 0){
+          data = p.read();
+          buffer[leidos++] = (byte)data;
+          println("Recibi: " + binary(data,8));
+        }
+        if(leidos == size){
+          println("Guardando el archivo");
+          saveBytes("recibido.bin",buffer);
+          estado = 0;
+          println("Archivo guardado, regresando al estado 0");
+        }
+        break;
+    }
   }
 }
