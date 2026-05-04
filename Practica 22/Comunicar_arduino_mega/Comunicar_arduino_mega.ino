@@ -10,12 +10,10 @@ const int txpin = 3;
 const byte H = 'H';
 const byte F = 'F';
 byte b;
-
-bool recibiendo_mensaje = false;
-bool conozco_tamanio = false;
 byte buffer[MAX_SIZE]; 
 
-int estado = 0;
+int estado_miPC = 0;
+int estado_arduino =0;
 unsigned int size = 0;
 unsigned int leidos = 0;
 
@@ -56,11 +54,11 @@ void enviarPC(int size){
 
 void loop() {
   if(Serial.available() > 0){ // Si la computadora a la cuál estoy conectado me envió algo:
-    switch(estado){
+    switch(estado_miPC){
       case 0: // Esperando H
         b = Serial.read();
         if(b == H){
-          estado = 1;
+          estado_miPC = 1;
           size = 0;
           leidos = 0;
         }
@@ -72,7 +70,7 @@ void loop() {
           size = (b << 8);
           b = Serial.read();
           size |= b;
-          estado = 2 ;
+          estado_miPC = 2 ;
         }
         break;
       case 2: // esperamos el mensaje a transmitir
@@ -82,7 +80,7 @@ void loop() {
         }
 
         if(leidos == size){
-          estado = 3;
+          estado_miPC = 3;
         }
 
         break;
@@ -91,7 +89,7 @@ void loop() {
         b = Serial.read();
         if(b == F){
           enviarArduino(size);
-          estado = 0;
+          estado_miPC = 0;
           size = 0;
           leidos = 0;
         }
@@ -101,11 +99,11 @@ void loop() {
 
   if(serialArduino.available() > 0){
     
-    switch(estado){
+    switch(estado_arduino){
       case 0: // Esperando H
         b = serialArduino.read();
         if(b == H){
-          estado = 1;
+          estado_arduino = 1;
           size = 0;
           leidos = 0;
         }
@@ -117,7 +115,7 @@ void loop() {
           size = (b << 8);
           b = serialArduino.read();
           size |= b;
-          estado = 2 ;
+          estado_arduino = 2 ;
         }
         break;
       case 2: // esperamos el mensaje a transmitir
@@ -127,7 +125,7 @@ void loop() {
         }
 
         if(leidos == size){
-          estado = 3;
+          estado_arduino = 3;
         }
 
         break;
@@ -136,7 +134,7 @@ void loop() {
         b = serialArduino.read();
         if(b == F){
           enviarPC(size);
-          estado = 0;
+          estado_arduino = 0;
           size = 0;
           leidos = 0;
         }
